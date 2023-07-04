@@ -1,25 +1,19 @@
-import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
+import { createClient, groq } from "next-sanity";
 
 export async function getProjects() {
-  const client = new ApolloClient({
-    uri: "YOUR_GRAPHQL_API_ENDPOINT",
-    cache: new InMemoryCache(),
+  const client = createClient({
+    projectId: "8oylheho",
+    dataset: "dataset",
+    apiVersion: "2023-05-04",
   });
 
-  const query = gql`
-    query GetProjects {
-      projects {
-        _id
-        _createdAt
-        name
-        slug
-        image
-        url
-        content
-      }
-    }
-  `;
-
-  const { data } = await client.query({ query });
-  return data.projects;
+  client.fetch(
+    groq`*[_type="project"]{
+      _id,
+      _createdAt,
+      name,
+      "slug": slug.current,
+      "image": image.asset -> url
+    }`
+  );
 }
